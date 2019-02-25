@@ -10,15 +10,15 @@
 static int myvar;
 
 static struct genl_family genl_example_family = {
-	.id = GENL_ID_GENERATE,
+	.module = THIS_MODULE,
+	.ops = NULL,
+	.mcgrps = NULL,
+	.n_ops = 0,
+	.n_mcgrps = 0,
 	.name = "nlex",
 	.hdrsize = 0,
 	.version = 1,
 	.maxattr = NLE_MAX,
-};
-
-static struct genl_multicast_group genl_example_mc = {
-	.name		= "example",
 };
 
 static int
@@ -76,7 +76,7 @@ genl_upd_myvar(struct sk_buff *skb, struct genl_info *info)
 
 	genlmsg_end(msg, hdr);
 
-	genlmsg_multicast(msg, 0, genl_example_mc.id, GFP_KERNEL);
+	genlmsg_multicast(&genl_example_family, msg, 0, NLEX_GRP_MYVAR, GFP_KERNEL);  // FIXME: The genlmsg_multicast() API has been changed by kernel developers. I'm not sure where to get a group number.
 	return 0;
 
 nlmsg_failure:
@@ -97,31 +97,21 @@ static struct genl_ops genl_example_ops[] = {
 	},
 };
 
+static struct genl_multicast_group genl_example_mcgrps[1] = {
+	{
+		.name = "example",
+	},
+};
+
 static int __init nlexample_init(void)
 {
-	int i, ret = -EINVAL;
-
-	ret = genl_register_family(&genl_example_family);
-	if (ret < 0)
-		goto err;
-
-	for (i = 0; i < ARRAY_SIZE(genl_example_ops); i++) {
-		ret = genl_register_ops(&genl_example_family,
-					&genl_example_ops[i]);
-		if (ret < 0)
-			goto err_unregister;
-	}
-
-	ret = genl_register_mc_group(&genl_example_family, &genl_example_mc);
-	if (ret < 0)
-		goto err_unregister;
-
-	return ret;
-
-err_unregister:
-	genl_unregister_family(&genl_example_family);
-err:
-	return ret;
+	genl_example_family.ops = genl_example_ops;
+	genl_example_family.n_ops =
+		sizeof(genl_example_ops) / sizeof(genl_example_ops[0]);
+	genl_example_family.mcgrps = genl_example_mcgrps;
+	genl_example_family.n_mcgrps =
+		sizeof(genl_example_mcgrps) / sizeof(genl_example_mcgrps[0]);
+	return genl_register_family(&genl_example_family);
 }
 
 void __exit nlexample_exit(void)
