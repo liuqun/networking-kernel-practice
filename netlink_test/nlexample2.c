@@ -94,7 +94,7 @@ static const struct nla_policy nle_info_policy[NLE_MAX+1] = {
 
 static int
 nl_step(struct sk_buff *skb,
-        struct nlmsghdr *nlh)
+        struct nlmsghdr *nlh, struct netlink_ext_ack *extack)
 {
    int err;
    struct nlattr *cda[NLE_MAX+1];
@@ -108,7 +108,7 @@ nl_step(struct sk_buff *skb,
       return -EINVAL;
 
    err = nla_parse(cda, NLE_MAX,
-		   attr, attrlen, nle_info_policy);
+		   attr, attrlen, nle_info_policy, NULL);
    if (err < 0)
       return err;
 
