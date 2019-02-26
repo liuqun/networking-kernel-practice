@@ -11,7 +11,7 @@
 #define NLEX_GRP_MAX	0
 
 static struct sock *nlsk;
-static int myvar;
+static int myvar = -1;  // We should set an initial value for debugging...
 
 static void
 nl_callback(struct sk_buff *skb)

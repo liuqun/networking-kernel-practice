@@ -7,7 +7,7 @@
 #include "nlexample.h"
 
 static struct sock *nlsk;
-static int myvar;
+static int myvar = -1;  // We should set an initial value for debugging...
 
 static int
 nlex_unicast(int pid)
