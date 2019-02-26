@@ -1,3 +1,7 @@
 # executables
 change
 event
+genl-change
+genl-event
+genl-resolve
+genl-get
