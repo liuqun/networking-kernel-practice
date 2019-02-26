@@ -3,13 +3,20 @@ LIB_PATH = /usr/lib
 obj-m += nlexample.o
 obj-m += nlexample2.o
 obj-m += genlexample.o
+TOOLSDIR := ./tools
 
-default:
+.PHONY: all
+all: modules tools
+
+.PHONY: modules
+modules:
 	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
 
-userspace:
-	gcc change.c /usr/lib/x86_64-linux-gnu/libmnl.so -o change
+.PHONY: tools
+tools:
+	$(MAKE) -C $(TOOLSDIR)
 
-	gcc event.c /usr/lib/x86_64-linux-gnu/libmnl.so -o event
+.PHONY: clean
 clean:
-	rm -rf *.o *.ko *.mod.* *.cmd .module* modules* Module* .*.cmd .tmp* change event
+	rm -rf *.o *.ko *.mod.* *.cmd .module* modules* Module* .*.cmd .tmp*
+	$(MAKE) -C $(TOOLSDIR) clean
