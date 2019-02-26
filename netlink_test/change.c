@@ -13,6 +13,7 @@ int main(void)
 	struct mnl_socket *nl;
 	int ret;
 	unsigned int seq, portid;
+	int datalen;
 
 	nlh = mnl_nlmsg_put_header(buf);
 	nlh->nlmsg_type = NLEX_MSG_UPD;
@@ -37,13 +38,13 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 
-	ret = mnl_socket_recvfrom(nl, buf, sizeof(buf));
-	while (ret == -1) {
+	datalen = mnl_socket_recvfrom(nl, buf, sizeof(buf));
+	if (datalen < 0) {
 		perror("mnl_socket_recvfrom");
 		exit(EXIT_FAILURE);
 	}
 
-	ret = mnl_cb_run(buf, ret, seq, portid, NULL, NULL);
+	ret = mnl_cb_run(buf, datalen, seq, portid, NULL, NULL);
 	if (ret == -1) {
 		perror("mnl_cb_callback");
 		exit(EXIT_FAILURE);
